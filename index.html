@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Archive.org Link Extractor</title>
+    <style>
+        /* Dark Mode */
+        body.dark {
+            background-color: #333;
+            color: #fff;
+        }
+
+        /* Modern UI */
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+
+        .button {
+            background-color: #2196F3;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+    </style>
+    <script>
+        function extractArchive() {
+            var archiveUrl = document.getElementById("archiveUrl").value;
+
+            // Extract data from Archive.org
+            fetch("https://archive.org/metadata/" + archiveUrl)
+                .then(response => response.json())
+                .then(data => {
+                    // Get name, magnet, and description from the response
+                    var name = data.metadata.title;
+                    var magnet = data.files[0].source;
+                    var description = data.metadata.description;
+
+                    // Display the extracted information
+                    document.getElementById("name").innerText = "Name: " + name;
+                    document.getElementById("magnet").innerText = "Magnet: " + magnet;
+                    document.getElementById("description").innerText = "Description: " + description;
+
+                    // Generate the download link
+                    var downloadLink = document.createElement("a");
+                    downloadLink.href = "data:text/plain;charset=utf-8," + encodeURIComponent(name + "\n" + magnet + "\n" + description);
+                    downloadLink.download = "extracted_data.txt";
+                    downloadLink.innerText = "Download";
+
+                    // Remove existing download link if any
+                    var existingDownloadLink = document.getElementById("downloadLink");
+                    if (existingDownloadLink) {
+                        existingDownloadLink.remove();
+                    }
+
+                    // Append the download button to the container
+                    downloadLink.id = "downloadLink";
+                    document.getElementById("container").appendChild(downloadLink);
+                })
+                .catch(error => {
+                    console.error(error);
+                    alert("Failed to extract data. Please check the Archive.org link and try again.");
+                });
+        }
+    </script>
+</head>
+<body>
+    <div id="container" class="container">
+        <h2>Archive.org Link Extractor</h2>
+        <input type="text" id="archiveUrl" placeholder="Enter Archive.org Link">
+        <button class="button" onclick="extractArchive()">Extract</button>
+        <h3 id="name"></h3>
+        <h3 id="magnet"></h3>
+        <h3 id="description"></h3>
+    </div>
+
+    <script>
+        // Toggle dark mode
+        function toggleDarkMode() {
+            document.body.classList.toggle("dark");
+        }
+    </script>
+
+    <button class="button" onclick="toggleDarkMode()">Toggle Dark Mode</button>
+</body>
+</html>
